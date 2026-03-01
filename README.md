@@ -11,31 +11,31 @@ Since Lazada loads its products dynamically using JavaScript, this project uses 
 * Saves the extracted data cleanly into a structured JSON file.
 * Includes error handling for missing data elements (returns `None` instead of crashing).
 
-## Installation
+## 🛠 Installation
 
 1. **Clone or download this repository** to your local machine.
 2. **Open your terminal** and navigate to the project folder.
 3. Create a virtual environment:**
-```bash
-python -m venv venv
-```
+   ```bash
+   python -m venv venv
+   ```
 
 Activate it with:
 (Windows)
-```bash
-source venv\Scripts\activate
-```
+   ```bash
+   source venv\Scripts\activate
+   ```
 
 (Mac/Linux)
-```bash
-source venv/bin/activate
-```
+   ```bash
+   source venv/bin/activate
+   ```
 4. **Install the required Python libraries:**
    ```bash
    pip install selenium beautifulsoup4
    ```
 
-## Usage
+## 🚀 Usage
 
 1. Run the script from your terminal:
    ```bash
