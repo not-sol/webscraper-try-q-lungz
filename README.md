@@ -32,7 +32,7 @@ Since Lazada loads its products dynamically using JavaScript, this project uses 
    ```
 4. **Install the required Python libraries:**
    ```bash
-   pip install selenium beautifulsoup4
+   pip install -r requirement.txt
    ```
 
 ## 🚀 Usage
