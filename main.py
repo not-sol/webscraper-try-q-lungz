@@ -3,7 +3,7 @@ from scraper import scrape_pages
 from utils import save_to_json
 
 def main():
-    search_item = input("Enter a product: ")
+    search_item = "-".join(input("Enter a product: ").strip().split())
     max_pages = int(input("Enter how many pages: "))
 
     print("Scraping...")
