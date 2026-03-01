@@ -15,18 +15,18 @@ Since Lazada loads its products dynamically using JavaScript, this project uses 
 
 1. **Clone or download this repository** to your local machine.
 2. **Open your terminal** and navigate to the project folder.
-3. Create a virtual environment:**
+3. Create a virtual environment:
    ```bash
    python -m venv venv
    ```
 
-Activate it with:
-(Windows)
+   Activate it with:
+   (Windows)
    ```bash
    source venv\Scripts\activate
    ```
 
-(Mac/Linux)
+   (Mac/Linux)
    ```bash
    source venv/bin/activate
    ```
