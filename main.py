@@ -1,70 +1,89 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-import time
-import json
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+import json
 
-# SETTINGS
-subreddit = "python"
-target_post_count = 10
+search_item = input("Enter a product: ")
+max_pages = int(input("Enter how many pages: "))
+
+base_url = f"https://www.lazada.com.ph/tag/{search_item}"
 
 options = Options()
 options.add_argument("--headless=new")
 options.add_argument("--disable-blink-features=AutomationControlled")
-options.add_argument("user-agent=Mozilla/5.0")
 
+print("Scraping...")
 driver = webdriver.Chrome(options=options)
-driver.get(f"https://www.reddit.com/r/{subreddit}/")
-time.sleep(5)
 
-# Scroll until enough content loads
-while True:
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
+products = []
 
-    page_source = driver.page_source
-    soup = BeautifulSoup(page_source, "html.parser")
-    articles = soup.find_all("article")
+for page in range(1, max_pages + 1):
 
-    print("Detected articles:", len(articles))
+    if page == 1:
+        url = base_url
+    else:
+        url = f"{base_url}/?page={page}"
 
-    if len(articles) >= target_post_count:
-        break
+
+    driver.get(url)
+
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div.Bm3ON"))
+    )
+
+    html = driver.page_source
+    soup = BeautifulSoup(html, "html.parser")
+
+    product_divs = soup.select("div.Bm3ON")
+
+    for item in product_divs:
+        # ---- NAME + LINK ----
+        name = None
+        link = None
+
+        anchor = item.select_one("a[title]")
+        if anchor:
+            name = anchor.get("title")
+            href = anchor.get("href")
+            if href:
+                if href.startswith("http"):
+                    link = href
+                else:
+                    link = "https:" + href
+
+        # ---- PRICE ----
+        price_tag = item.select_one("span.ooOxS")
+        price = price_tag.get_text(strip=True) if price_tag else None
+
+        # ---- SOLD ----
+        sold_tag = item.select_one("span._1cEkb")
+        sold = sold_tag.get_text(strip=True) if sold_tag else None
+
+        # ---- REVIEWS ----
+        reviews_tag = item.select_one("span.qzqFw")
+        reviews = reviews_tag.get_text(strip=True) if reviews_tag else None
+
+        # ---- LOCATION ----
+        location_tag = item.select_one("span.oa6ri")
+        location = location_tag.get_text(strip=True) if location_tag else None
+
+        # ---- STORE PRODUCT ----
+        products.append({
+            "name": name,
+            "price": price,
+            "sold": sold,
+            "reviews": reviews,
+            "location": location,
+            "link": link,
+        })
+
+# ---- SAVE TO JSON ----
+with open(f"data/{search_item}.json", "w", encoding="utf-8") as f:
+    json.dump(products, f, indent=4, ensure_ascii=False)
+
+print("Saved", len(products), "products to products.json")
 
 driver.quit()
-
-# Parse posts
-collected_posts = []
-seen_titles = set()
-
-for article in articles:
-    title_tag = article.find("h3")
-    if not title_tag:
-        continue
-
-    title = title_tag.get_text(strip=True)
-
-    if title in seen_titles:
-        continue
-    seen_titles.add(title)
-
-    link_tag = article.find("a")
-    link = link_tag["href"] if link_tag and link_tag.has_attr("href") else ""
-
-    upvote_tag = article.select_one("[data-click-id='score']")
-    upvotes = upvote_tag.get_text(strip=True) if upvote_tag else "N/A"
-
-    collected_posts.append({
-        "title": title,
-        "link": link,
-        "upvotes": upvotes
-    })
-
-    if len(collected_posts) >= target_post_count:
-        break
-
-# Save JSON
-with open(f"{subreddit}_posts.json", "w", encoding="utf-8") as f:
-    json.dump(collected_posts, f, indent=4, ensure_ascii=False)
-
-print(f"Saved {len(collected_posts)} posts.")
